@@ -3,19 +3,18 @@ package com.example.SpringSecurity.Configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -31,14 +30,20 @@ public  class SpringSecurityConfig{
 //                .authorizeHttpRequests((auth)->auth.requestMatchers("/api/v1/noAuth").permitAll());
 //        return http.build();
 //    }
-    @Bean
-   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
-            .csrf(csrf ->csrf.disable())
-            .authorizeHttpRequests(auth->auth.requestMatchers("/api/v1/noAuth/**")
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated()).formLogin(Customizer.withDefaults()).build();
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(
+                    auth -> {
+                        auth.requestMatchers("/api/v1/noAuth/**","/api/v1/login").permitAll();
+                        auth.requestMatchers("/api/v1").authenticated();
+                        auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                        auth.requestMatchers("/user/**").hasRole("USER");
+                        auth.anyRequest().authenticated();
+                    }).formLogin(AbstractAuthenticationFilterConfigurer::permitAll).build();
+
+
 
     }
 //authentication Static
@@ -52,11 +57,7 @@ public  class SpringSecurityConfig{
 //        UserDetails user = User.withUsername("user")
 //                .password(encoder.encode("user123"))
 //                .roles("USER").build();
-
 //        return new InMemoryUserDetailsManager(admin,user);
-
-
-
 //   }
 
 
@@ -70,6 +71,11 @@ public  class SpringSecurityConfig{
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(){
+     return new ProviderManager(authenticationProvider());
+    }
+//Database Authentication Provider
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
