@@ -28,15 +28,14 @@ public class BaseModel {
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime CreatedAt;
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP(0)")    private LocalDateTime CreatedAt;
 
     @LastModifiedBy
     protected String lastModifiedBy;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "last_modified_at", columnDefinition = "TIMESTAMP(0)")
     protected LocalDateTime lastModifiedDate;
 
     protected Boolean active;
