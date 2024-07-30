@@ -28,7 +28,8 @@ public class BaseModel {
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP(0)")    private LocalDateTime CreatedAt;
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP(0)")
+    private LocalDateTime CreatedAt;
 
     @LastModifiedBy
     protected String lastModifiedBy;
